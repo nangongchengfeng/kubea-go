@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 
 	"github.com/aryming/logger"
@@ -74,6 +75,24 @@ func (p *pod) DeletePod(client *kubernetes.Clientset, namespace, podName string)
 	if err != nil {
 		logger.Error(errors.New("删除Pod失败, " + err.Error()))
 		return errors.New("删除Pod失败, " + err.Error())
+	}
+	return nil
+}
+
+// UpdatePod 更新POD   content参数是请求中传入的pod对象的json数据
+func (p *pod) UpdatePod(client *kubernetes.Clientset, namespace, podName, content string) error {
+	var pod = &corev1.Pod{}
+	// 将content参数的json数据解析到pod对象中
+	err := json.Unmarshal([]byte(content), pod)
+	if err != nil {
+		logger.Error(errors.New("反序列化失败, " + err.Error()))
+		return errors.New("反序列化失败, " + err.Error())
+	}
+	// 更新pod
+	_, err = client.CoreV1().Pods(namespace).Update(context.TODO(), pod, metav1.UpdateOptions{})
+	if err != nil {
+		logger.Error(errors.New("更新Pod失败, " + err.Error()))
+		return errors.New("更新Pod失败, " + err.Error())
 	}
 	return nil
 }
