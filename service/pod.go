@@ -68,6 +68,16 @@ func (p *pod) GetPodDetail(client *kubernetes.Clientset, namespace, podName stri
 	return pod, nil
 }
 
+// DeletePod 删除POD
+func (p *pod) DeletePod(client *kubernetes.Clientset, namespace, podName string) error {
+	err := client.CoreV1().Pods(namespace).Delete(context.TODO(), podName, metav1.DeleteOptions{})
+	if err != nil {
+		logger.Error(errors.New("删除Pod失败, " + err.Error()))
+		return errors.New("删除Pod失败, " + err.Error())
+	}
+	return nil
+}
+
 // toCells 方法用于将pod类型数组，转换成DataCell类型数组
 func (p *pod) toCells(std []corev1.Pod) []DataCell {
 	cells := make([]DataCell, len(std))
