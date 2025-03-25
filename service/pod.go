@@ -58,6 +58,16 @@ func (p *pod) GetPods(client *kubernetes.Clientset, filterName, namespace string
 	return &PodsResp{Items: pods, Total: total}, nil
 }
 
+// GetPodDetail 获取pod详情
+func (p *pod) GetPodDetail(client *kubernetes.Clientset, namespace, podName string) (*corev1.Pod, error) {
+	pod, err := client.CoreV1().Pods(namespace).Get(context.TODO(), podName, metav1.GetOptions{})
+	if err != nil {
+		logger.Error(errors.New("获取Pod详情失败, " + err.Error()))
+		return nil, errors.New("获取Pod详情失败, " + err.Error())
+	}
+	return pod, nil
+}
+
 // toCells 方法用于将pod类型数组，转换成DataCell类型数组
 func (p *pod) toCells(std []corev1.Pod) []DataCell {
 	cells := make([]DataCell, len(std))
