@@ -11,5 +11,6 @@ package config
 const (
 	ListenAddress = "0.0.0.0:8081"
 	//为了验证多集群
-	Kubeconfigs = `{"TST-1":"E:\\GitHUB_Code_Check\\VUE\\kubea-go\\config\\k8s.yaml","TST-2":"E:\\GitHUB_Code_Check\\VUE\\kubea-go\\config\\k8s.yaml"}`
+	Kubeconfigs    = `{"TST-1":"E:\\GitHUB_Code_Check\\VUE\\kubea-go\\config\\k8s.yaml","TST-2":"E:\\GitHUB_Code_Check\\VUE\\kubea-go\\config\\k8s.yaml"}`
+	PodLogTailLine = 500
 )

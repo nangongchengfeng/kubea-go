@@ -16,8 +16,27 @@ var Router router
 type router struct {
 }
 
+const apiBasePath = "/api/k8s"
+
 // InitRouter 初始化路由
 
 func (*router) InitApiRouter(r *gin.Engine) {
-	r.GET("/api", func(c *gin.Context) { c.JSON(200, gin.H{"message": "pong"}) })
+	r.GET("/api/ping", func(c *gin.Context) { c.JSON(200, gin.H{"message": "pong"}) })
+
+	// Pod 路由服务
+	podGroup := r.Group(apiBasePath)
+	{
+		podGroup.GET("/pod", Pod.GetPods)
+		podGroup.GET("/pod/detail", Pod.GetPodDetail)
+		podGroup.DELETE("/pod/del", Pod.DeletePod)
+		podGroup.PUT("/pod/update", Pod.UpdatePod)
+		podGroup.GET("/pod/container", Pod.GetPodContainer)
+		podGroup.GET("/pod/log", Pod.GetPodLog)
+	}
+	//r.GET("/api/k8s/pod", Pod.GetPods)
+	//r.GET("/api/k8s/pod/detail", Pod.GetPodDetail)
+	//r.DELETE("/api/k8s/pod/del", Pod.DeletePod)
+	//r.PUT("/api/k8s/pod/update", Pod.UpdatePod)
+	//r.GET("/api/k8s/pod/container", Pod.GetPodContainer)
+	//r.GET("/api/k8s/pod/log", Pod.GetPodLog)
 }

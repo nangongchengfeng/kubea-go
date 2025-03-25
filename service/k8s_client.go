@@ -35,6 +35,7 @@ func (k *k8s) GetClient(clusterName string) (*kubernetes.Clientset, error) {
 	client, ok := k.ClientMap[clusterName]
 	// 如果不存在，则返回错误
 	if !ok {
+		logger.Error(fmt.Sprintf("集群%s不存在,无法获取Client\n", clusterName))
 		return nil, errors.New(fmt.Sprintf("集群%s不存在,无法获取Client\n", clusterName))
 	}
 	// 返回客户端
