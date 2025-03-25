@@ -1,9 +1,12 @@
 package service
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
+	"kubea-go/config"
 
 	"github.com/aryming/logger"
 
@@ -95,6 +98,48 @@ func (p *pod) UpdatePod(client *kubernetes.Clientset, namespace, podName, conten
 		return errors.New("更新Pod失败, " + err.Error())
 	}
 	return nil
+}
+
+// GetPodContainer 获取pod容器
+func (p *pod) GetPodContainer(client *kubernetes.Clientset, namespace, podName string) (containers []string, err error) {
+	// 获取pod详情
+	pod, err := p.GetPodDetail(client, namespace, podName)
+	if err != nil {
+		logger.Error(errors.New("获取Pod详情失败, " + err.Error()))
+		return nil, errors.New("获取Pod详情失败, " + err.Error())
+	}
+	// 从pod详情中获取容器列表
+	for _, container := range pod.Spec.Containers {
+		containers = append(containers, container.Name)
+	}
+	return containers, nil
+}
+
+// GetPodLog 获取pod内容器日志
+func (p *pod) GetPodLog(client *kubernetes.Clientset, namespace, podName, containerName string) (log string, err error) {
+	//设置日志的配置，容器名、tail的行数
+	lineLimit := int64(config.PodLogTailLine)
+	options := &corev1.PodLogOptions{
+		Container: containerName,
+		TailLines: &lineLimit,
+	}
+	// 获取request实例
+	req := client.CoreV1().Pods(namespace).GetLogs(podName, options)
+	// 发起request请求，返回一个io.ReadCloser类型（等同于response.body）
+	podLogs, err := req.Stream(context.TODO())
+	if err != nil {
+		logger.Error(errors.New("获取Pod日志失败, " + err.Error()))
+		return "", errors.New("获取Pod日志失败, " + err.Error())
+	}
+	defer podLogs.Close()
+	//将response body写入到缓冲区，目的是为了转成string返回
+	buf := new(bytes.Buffer)
+	_, err = io.Copy(buf, podLogs)
+	if err != nil {
+		logger.Error(errors.New("复制PodLog失败, " + err.Error()))
+		return "", errors.New("复制PodLog失败, " + err.Error())
+	}
+	return buf.String(), nil
 }
 
 // toCells 方法用于将pod类型数组，转换成DataCell类型数组
