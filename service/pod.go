@@ -74,6 +74,7 @@ func (p *pod) GetPodDetail(client *kubernetes.Clientset, namespace, podName stri
 
 // DeletePod 删除POD
 func (p *pod) DeletePod(client *kubernetes.Clientset, namespace, podName string) error {
+	// 删除pod
 	err := client.CoreV1().Pods(namespace).Delete(context.TODO(), podName, metav1.DeleteOptions{})
 	if err != nil {
 		logger.Error(errors.New("删除Pod失败, " + err.Error()))

@@ -42,7 +42,7 @@ func (k *k8s) GetClient(clusterName string) (*kubernetes.Clientset, error) {
 	return client, nil
 }
 
-// 初始化k8s client
+// Init 初始化k8s client
 func (k *k8s) Init() {
 	// 创建一个空的map，用于存储Kubeconfigs
 	mp := make(map[string]string, 0)

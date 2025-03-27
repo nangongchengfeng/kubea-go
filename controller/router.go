@@ -33,10 +33,5 @@ func (*router) InitApiRouter(r *gin.Engine) {
 		podGroup.GET("/pod/container", Pod.GetPodContainer)
 		podGroup.GET("/pod/log", Pod.GetPodLog)
 	}
-	//r.GET("/api/k8s/pod", Pod.GetPods)
-	//r.GET("/api/k8s/pod/detail", Pod.GetPodDetail)
-	//r.DELETE("/api/k8s/pod/del", Pod.DeletePod)
-	//r.PUT("/api/k8s/pod/update", Pod.UpdatePod)
-	//r.GET("/api/k8s/pod/container", Pod.GetPodContainer)
-	//r.GET("/api/k8s/pod/log", Pod.GetPodLog)
+
 }

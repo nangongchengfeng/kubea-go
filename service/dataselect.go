@@ -18,8 +18,8 @@ import (
 
 // dataSelect 用于封装排序、过滤、分页的数据类型
 type dataSelector struct {
-	GenericDateSelect []DataCell       // 接口
-	dataSelectQuery   *DataSelectQuery // 结构体
+	GenericDateSelect []DataCell       // 可排序的数据集合
+	dataSelectQuery   *DataSelectQuery // 查询条件
 }
 
 // DataCell 用于各种资源list的类型转换，转换后可以使用dataSelector的自定义排序方法
@@ -32,8 +32,8 @@ type DataCell interface {
 // Limit是单页的数据条数
 // Page是第几页
 type DataSelectQuery struct {
-	FilterQuery     *FilterQuery
-	PaginationQuery *PaginationQuery
+	FilterQuery     *FilterQuery     // 过滤条件
+	PaginationQuery *PaginationQuery // 分页条件
 }
 
 type FilterQuery struct {
