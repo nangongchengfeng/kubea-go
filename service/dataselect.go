@@ -141,3 +141,13 @@ func (d deploymentCell) GetCreation() time.Time {
 func (d deploymentCell) GetName() string {
 	return d.Name
 }
+
+type daemonSetCell appsv1.DaemonSet
+
+func (d daemonSetCell) GetCreation() time.Time {
+	return d.CreationTimestamp.Time
+}
+
+func (d daemonSetCell) GetName() string {
+	return d.Name
+}

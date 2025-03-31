@@ -300,7 +300,7 @@ func (d *deployment) UpdateDeployment(c *gin.Context) {
 	})
 }
 
-// 获取每个namespace的pod数量
+// GetDeployNumPerNp 获取每个namespace的pod数量
 func (d *deployment) GetDeployNumPerNp(c *gin.Context) {
 	params := new(struct {
 		Cluster string `form:"cluster"`

@@ -45,4 +45,12 @@ func (*router) InitApiRouter(r *gin.Engine) {
 		deploymentGroup.GET("/deployment/numnp", Deployment.GetDeployNumPerNp)
 		deploymentGroup.POST("/deployment/create", Deployment.CreateDeployment)
 	}
+	// DaemonSet 路由服务
+	daemonSetGroup := r.Group(apiBasePath)
+	{
+		daemonSetGroup.GET("/daemonset", DaemonSet.GetDaemonSets)
+		daemonSetGroup.GET("/daemonset/detail", DaemonSet.GetDaemonSetDetail)
+		daemonSetGroup.DELETE("/daemonset/del", DaemonSet.DeleteDaemonSet)
+		daemonSetGroup.PUT("/daemonset/update", DaemonSet.UpdateDaemonSet)
+	}
 }
