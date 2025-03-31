@@ -53,6 +53,43 @@ type DeployCreate struct {
 	Cluster       string            `json:"cluster"`
 }
 
+// DeploysNp 定义DeploysNp类型，用于返回namespace中deployment的数量
+type DeploysNp struct {
+	Namespace string `json:"namespace"`
+	DeployNum int    `json:"deployment_num"`
+}
+
+func (d *deployment) GetDeployments(client *kubernetes.Clientset, filterName string, namespace string, limit int, page int) (*DeploymentsResp, error) {
+	// 获取deployment列表
+	deploymentList, err := client.AppsV1().Deployments(namespace).List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		logger.Error(errors.New("获取Deployment列表失败, " + err.Error()))
+		return nil, errors.New("获取Deployment列表失败, " + err.Error())
+	}
+	//将deploymentList中的deployment列表(Items)，放进dataselector对象中，进行排序
+	selectableData := &dataSelector{
+		GenericDateSelect: d.toCells(deploymentList.Items),
+		dataSelectQuery: &DataSelectQuery{
+			FilterQuery: &FilterQuery{Name: filterName},
+			PaginationQuery: &PaginationQuery{
+				Limit: limit,
+				Page:  page,
+			},
+		},
+	}
+	filtered := selectableData.Filter()
+	total := len(filtered.GenericDateSelect)
+	data := filtered.Sort().Paginate()
+
+	//将[]DataCell类型的deployment列表转为appsv1.deployment列表
+	deployments := d.fromCells(data.GenericDateSelect)
+
+	return &DeploymentsResp{
+		Items: deployments,
+		Total: total,
+	}, nil
+}
+
 // ScaleDeployment 设置deployment副本数
 func (d *deployment) ScaleDeployment(client *kubernetes.Clientset, deploymentName, namespace string, scaleNum int) (replicas int32, err error) {
 	// 获取autoscalingV1接口的对象，能点出当前的副本数
@@ -203,6 +240,82 @@ func (d *deployment) RestartDeployment(client *kubernetes.Clientset, deploymentN
 	if err != nil {
 		logger.Error(errors.New("重启deployment失败, " + err.Error()))
 		return errors.New("重启deployment失败, " + err.Error())
+	}
+	return nil
+}
+
+// GetDeploymentDetail 获取deployment详情
+func (d *deployment) GetDeploymentDetail(client *kubernetes.Clientset, namespace string, name string) (deployment *appsv1.Deployment, err error) {
+	deployment, err = client.AppsV1().Deployments(namespace).Get(context.TODO(), name, metav1.GetOptions{})
+	if err != nil {
+		logger.Error(errors.New("获取deployment详情失败, " + err.Error()))
+		return nil, errors.New("获取deployment详情失败, " + err.Error())
+	}
+	return deployment, nil
+}
+
+func (d *deployment) DeleteDeployment(client *kubernetes.Clientset, name string, namespace string) (err error) {
+	err = client.AppsV1().Deployments(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
+	if err != nil {
+		logger.Error(errors.New("删除deployment失败, " + err.Error()))
+		return errors.New("删除deployment失败, " + err.Error())
+	}
+	return nil
+}
+
+// GetDeployNumPerNp 获取每个namespace的deployment数量
+func (d *deployment) GetDeployNumPerNp(client *kubernetes.Clientset) (deploysNps []*DeploysNp, err error) {
+	namespaceList, err := client.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		logger.Error(errors.New("获取namespace列表失败, " + err.Error()))
+		return nil, errors.New("获取namespace列表失败, " + err.Error())
+	}
+	for _, namespace := range namespaceList.Items {
+		deploymentList, err := client.AppsV1().Deployments(namespace.Name).List(context.TODO(), metav1.ListOptions{})
+		if err != nil {
+			logger.Error(errors.New("获取namespace:" + namespace.Name + "的deployment列表失败, " + err.Error()))
+			return nil, errors.New("获取namespace:" + namespace.Name + "的deployment列表失败, " + err.Error())
+		}
+		deploysNp := &DeploysNp{
+			Namespace: namespace.Name,
+			DeployNum: len(deploymentList.Items),
+		}
+
+		deploysNps = append(deploysNps, deploysNp)
+	}
+	return deploysNps, nil
+}
+
+func (d *deployment) toCells(std []appsv1.Deployment) []DataCell {
+	cells := make([]DataCell, len(std))
+	for i := range std {
+		cells[i] = deploymentCell(std[i])
+	}
+	return cells
+}
+
+func (d *deployment) fromCells(cells []DataCell) []appsv1.Deployment {
+	std := make([]appsv1.Deployment, len(cells))
+	for i := range std {
+		std[i] = appsv1.Deployment(cells[i].(deploymentCell))
+	}
+	return std
+}
+
+// UpdateDeployment 更新deployment
+func (d *deployment) UpdateDeployment(client *kubernetes.Clientset, namespace, content string) (err error) {
+	var deploy = &appsv1.Deployment{}
+
+	err = json.Unmarshal([]byte(content), deploy)
+	if err != nil {
+		logger.Error(errors.New("反序列化失败, " + err.Error()))
+		return errors.New("反序列化失败, " + err.Error())
+	}
+
+	_, err = client.AppsV1().Deployments(namespace).Update(context.TODO(), deploy, metav1.UpdateOptions{})
+	if err != nil {
+		logger.Error(errors.New("更新Deployment失败, " + err.Error()))
+		return errors.New("更新Deployment失败, " + err.Error())
 	}
 	return nil
 }

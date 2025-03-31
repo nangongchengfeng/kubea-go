@@ -33,5 +33,16 @@ func (*router) InitApiRouter(r *gin.Engine) {
 		podGroup.GET("/pod/container", Pod.GetPodContainer)
 		podGroup.GET("/pod/log", Pod.GetPodLog)
 	}
-
+	// Deployment 路由服务
+	deploymentGroup := r.Group(apiBasePath)
+	{
+		deploymentGroup.GET("/deployment", Deployment.GetDeployments)
+		deploymentGroup.GET("/deployment/detail", Deployment.GetDeploymentDetail)
+		deploymentGroup.PUT("/deployment/scale", Deployment.ScaleDeployment)
+		deploymentGroup.DELETE("/deployment/del", Deployment.DeleteDeployment)
+		deploymentGroup.PUT("/deployment/restart", Deployment.RestartDeployment)
+		deploymentGroup.PUT("/deployment/update", Deployment.UpdateDeployment)
+		deploymentGroup.GET("/deployment/numnp", Deployment.GetDeployNumPerNp)
+		deploymentGroup.POST("/deployment/create", Deployment.CreateDeployment)
+	}
 }
