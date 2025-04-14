@@ -151,3 +151,13 @@ func (d daemonSetCell) GetCreation() time.Time {
 func (d daemonSetCell) GetName() string {
 	return d.Name
 }
+
+type statefulSetCell appsv1.StatefulSet
+
+func (s statefulSetCell) GetCreation() time.Time {
+	return s.CreationTimestamp.Time
+}
+
+func (s statefulSetCell) GetName() string {
+	return s.Name
+}

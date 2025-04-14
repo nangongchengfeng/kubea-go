@@ -53,4 +53,12 @@ func (*router) InitApiRouter(r *gin.Engine) {
 		daemonSetGroup.DELETE("/daemonset/del", DaemonSet.DeleteDaemonSet)
 		daemonSetGroup.PUT("/daemonset/update", DaemonSet.UpdateDaemonSet)
 	}
+	// StatefulSet 路由服务
+	statefulSetGroup := r.Group(apiBasePath)
+	{
+		statefulSetGroup.GET("/statefulset", StatefulSet.GetStatefulSets)
+		statefulSetGroup.GET("/statefulset/detail", StatefulSet.GetStatefulSetDetail)
+		statefulSetGroup.DELETE("/statefulset/del", StatefulSet.DeleteStatefulSet)
+		statefulSetGroup.PUT("/statefulset/update", StatefulSet.UpdateStatefulSet)
+	}
 }
